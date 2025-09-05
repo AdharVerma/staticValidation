@@ -27,7 +27,9 @@ deny[msg] {
   val := object.get(input.metadata.annotations, key, "")
 
   # Condition: missing or empty annotation
-  (val == "" or is_null(val)) 
+  (val == "")
+  or
+  is_null(val)
 
   msg := sprintf("XRD: '%s' must include non-empty annotation: '%s' in metadata.annotations. The Knowledge Base in your XRD is not correct please refer: https://cmp.allianz.net/spaces/FCP/pages/2284557527/Instructions+and+support+for+filling+out+XRD+Knowledgebase", [input.metadata.name, key])
 }
