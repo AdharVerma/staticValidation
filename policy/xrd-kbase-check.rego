@@ -11,7 +11,6 @@
 package main
 
 #List of all the required annotations in the Knowledgebase
-List of required annotation keys
 required_annotations := {
   "docs.allianz.io/description",
   "docs.allianz.io/usecases",
