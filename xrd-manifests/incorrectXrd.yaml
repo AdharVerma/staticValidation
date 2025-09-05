@@ -27,7 +27,7 @@ metadata:
           - Must be unique per FCP profile 
           - The Cluster name provided is used to create the Azure AKS cluster with the name as aks-<cluster_name>-<location_code>-<d(dev) or p(prod)>-main
           - If customer have multiple Azure Subscriptions and need to create two clusters with the same name in the same FCP profile, then specify a unique spec.cluster.name for the crossplane managed resources and specify crossplane.io/external-name annotation with the common AKS cluster name.
-      docs.allianz.io/tags: 
+      docs.allianz.io/tags:
 spec:
   group: composite.adp.allianz.io
   names:
