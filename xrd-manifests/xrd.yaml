@@ -1,0 +1,251 @@
+---
+apiVersion: apiextensions.crossplane.io/v1
+kind: CompositeResourceDefinition
+metadata:
+  name: xaksclusters.composite.adp.allianz.io
+  annotations:
+      docs.allianz.io/description: |
+          Provisions a CRP2.0 Azure Kubernetes Service (AKS) cluster in the Future Cloud Platform(FCP) Azure subscriptions.
+          AKS is an Azure managed Kubernetes service that can be used to deploy and manage containerized applications that require high availability, 
+          scalability, and portability, and for deploying applications to multiple regions.
+      docs.allianz.io/usecases: |
+          - Containerize and run applications as microservices
+          - Run applications in Azure cloud that can be accessed only within Allianz internal network
+          - Namespace isolation, RBAC, NetworkPolicy for multitenant workloads
+          - Integrate Applications with existing Azure services like Storage Account, KeyVault and Azure Container Registry
+          - Multi-zone node pools for resilient workloads
+          - Native Integration with Dynatrace for monitoring and observability
+          - Run applications in multiple regions
+      docs.allianz.io/advantages: |
+          - Reduces operational overhead with a fully managed control plane
+          - Availability of Node Autoscaling and Spot VMs to reduce cloud spend
+          - Ensures secure, enterprise-grade deployments with RBAC and network policies
+          - Offers seamless integration with Allianz's infrastructure and Azure services
+          - Secure outbound internet access for applications
+          - Flexibility in choosing configurations via custom configs
+      docs.allianz.io/dependencies: |
+          - dedicatedsubscription.v1.az.composite.scc.allianz.io
+          - dedicatedvnet.v1.az.composite.scc.allianz.io
+          - privatednszone.azure.composite.scc.allianz.io
+      docs.allianz.io/namingConvention: |
+          - Cluster name must be between 3 and 24 characters. 
+          - Must be unique per FCP profile 
+          - The Cluster name provided is used to create the Azure AKS cluster with the name as aks-<cluster_name>-<location_code>-<d(dev) or p(prod)>-main
+          - If customer have multiple Azure Subscriptions and need to create two clusters with the same name in the same FCP profile, then specify a unique spec.cluster.name for the crossplane managed resources and specify crossplane.io/external-name annotation with the common AKS cluster name.
+      docs.allianz.io/tags: azure, kubernetes, aks, dedicated, microservices, adp, crp, crp2, crp2.0
+      docs.allianz.io/frontEndName: "CRP2.0 Azure Kubernetes Service (AKS) cluster"
+spec:
+  group: composite.adp.allianz.io
+  names:
+    kind: XAksCluster
+    plural: xaksclusters
+    singular: xakscluster
+  claimNames:
+    kind: AksCluster
+    plural: aksclusters
+    singular: akscluster
+  defaultCompositeDeletePolicy: Foreground
+  versions:
+    - name: v1alpha1
+      served: true
+      referenceable: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              required:
+                - cluster
+              properties:
+                team:
+                  type: object
+                  properties:
+                    name:
+                      description: 'Name: the name of your team inside the ADP Billing Account'
+                      type: string
+                cluster:
+                  type: object
+                  properties:
+                    name:
+                      description: 'Name: the name of your cluster. The name value should have the format: Lowercase alphanumeric string that may include hyphens, but not start or end with one, and no consecutive hyphens.'
+                      type: string
+                      pattern: ^[a-z0-9]+(?:-[a-z0-9]+)*$
+                      minLength: 4
+                      maxLength: 24
+                    deploymentLocation:
+                      description: 'deploymentLocation: the Location where AKS will be deployed. Possible values: "azure_we1" -> Azure West Europe (Amsterdam) "azure_fc1" -> Azure France Central (Paris) "azure_ae1" -> Azure Australia East (New South Wales) "azure_sa1" -> Azure Southeast Asia (Singapore) "azure_cu1" -> Azure Central US (Iowa) "azure_eu2" -> Azure East US 2 (Virginia) "azure_gwc1" -> Azure Germany West Central (Frankfurt) "azure_ns1" -> Azure Switzerland North (Zurich) "azure_ws1" -> Azure Switzerland West (Geneva) "azure_ne1" -> Azure North Europe (Dublin) "azure_ase1" -> Azure Australia Southeast (Melbourne)'
+                      enum:
+                        - azure_sa1
+                        - azure_we1
+                        - azure_fc1
+                        - azure_ae1
+                        - azure_sa1
+                        - azure_cu1
+                        - azure_eu2
+                        - azure_gwc1
+                        - azure_ns1
+                        - azure_ws1
+                        - azure_ne1
+                        - azure_ase1
+                      type: string
+                    serviceAdminEmail:
+                      type: string
+                      description: 'serviceAdminEmail: email of a user who will be assigned as an initial service admin'
+                    serviceParameters:
+                      description: ServiceParameters holds the desired parameters for
+                        aks
+                      properties:
+                        advancedParameters:
+                          description: 'AdvancedParameters : The Advanced parameters
+                            desired for aks.'
+                          properties:
+                            azureCni:
+                              type: string
+                              description: 'azureCni: Flag to mark if the cluster will use azure plugin or kubenet'
+                              enum:
+                                - "true"
+                                - "false"
+                            diskEncryptionSetId:
+                              type: string
+                              description: 'diskEncryptionSetId: Contains the Resource ID of the Disk Encryption Set for the encryption of OS and Data Disks of Azure Nodes'
+                            kmsKey:
+                              type: string
+                              description: 'kmsKey: contains the KeyVault key for KMS etcd encryption. A Public or Private AKV can be used. A private AKV must associate to only one AKS cluster.'
+                            customConfig:
+                              type: string
+                              description: 'customConfig: Path of the cluster custom config in GHE. This is applicable for release 10.0.0 and later.'
+                            aksPublicCustomerAllowlist:
+                              type: string
+                              description: 'aksPublicCustomerAllowlist: comma separated list of CIDRs that should be allowed to access AKS API Endpoint. The inputs should be only Public CIDRs'
+                          type: object
+                        availabilityZones:
+                          description: 'availabilityZones: number of availability zones to deploy agent nodes into'
+                          enum:
+                            - "2"
+                            - "3"
+                          type: string
+                        subscriptionName:
+                          description: 'subscriptionName: The Name of the managed resource of Azure Subscruption that the services will be created in.'
+                          mapping: 'dedicatedsubscription.v1.az.composite.scc.allianz.io/metadata.name'
+                          type: string
+                        subscriptionId:
+                          description: 'subscriptionId: The ID of the Azure subscription that the services will be created in. Not required if subscriptionName is specified'
+                          type: string
+                        environmentConfigRefs:
+                          description: 'environmentConfigRefs: Selector for environmentconfigs created by DedicatedSubscription and DedicatedVnet claims'
+                          type: object
+                          properties:
+                            subscriptionName:
+                              description: 'subscriptionName: The Name of the managed resource of Azure Subscruption that the services will be created in.'
+                              mapping: 'dedicatedsubscription.v1.az.composite.scc.allianz.io/metadata.name'
+                              type: string
+                            vnetName:
+                              description: 'vnetName: The Name of the managed resource of Azure VNet that the cluster will be created in.'
+                              type: string
+                              mapping: 'dedicatedvnet.v1.az.composite.scc.allianz.io/metadata.name'
+                            ingressSubnet:
+                              description: 'ingressSubnet: subnet to use as ingress subnet for the aks cluster'
+                              type: object
+                              properties:
+                                subnetType:
+                                  description: 'subnetType: type of the ingress subnet as per the SCC Zoning model'
+                                  type: string
+                                  enum:
+                                    - enterprise
+                                    - interaction
+                                    - management
+                                    - transitional
+                                    - agn
+                                    - internet
+                                index:
+                                  description: 'index: Index of the subnet in the array as per environmentconfigs created by the DedicatedVnet'
+                                  type: integer
+                                  default: 0
+                              required:
+                                - subnetType
+                            clusterSubnet:
+                              description: 'clusterSubnet: subnet to use as cluster subnet for the aks cluster'
+                              type: object
+                              properties:
+                                subnetType:
+                                  description: 'subnetType: type of the cluster subnet as per the SCC Zoning model'
+                                  type: string
+                                  enum:
+                                    - enterprise
+                                    - interaction
+                                    - management
+                                    - transitional
+                                    - agn
+                                    - internet
+                                index:
+                                  description: 'index: Index of the subnet in the array as per environmentconfigs created by the DedicatedVnet'
+                                  type: integer
+                                  default: 0
+                              required:
+                                - subnetType
+                          required:
+                            - vnetName
+                            - subscriptionName
+                            - ingressSubnet
+                            - clusterSubnet
+                        version:
+                          description: 'version: version of cluster to be deployed as per CRP documentation'
+                          type: string
+                        productionCluster:
+                          description: 'productionCluster: indicates if the cluster is considered a production environment from application / workload perspective. This might be used in critical (e.g. CVE) patching situations to prioritize patching order. It is also used to map the cluster to Dynatrace tenants'
+                          enum:
+                            - "true"
+                            - "false"
+                          type: string
+                        enableStorageProvisioning:
+                          description: 'enableStorageProvisioning: Specify whether to enable storage provisioned or not. Disabling functionality will be available in a future release.'
+                          enum:
+                            - "true"
+                            - "false"
+                          type: string
+                        ingressSubnetName:
+                          description: 'ingressSubnetName: Name of the subnet in Azure to use as ingress subnet for the aks cluster'
+                          type: string
+                        clusterSubnetName:
+                          description: 'clusterSubnetName: Name of the subnet in Azure to use as ingress subnet for the aks cluster'
+                          type: string
+                        adViewerGroupName:
+                          description: 'Name of your Viewer AD group created via GIAM. Members will have View access over the cluster'
+                          type: string
+                        adEditorGroupName:
+                          description: 'Name of your Editor AD group created via GIAM. Members will have Edit access over the cluster'
+                          type: string
+                        adAdminGroupName:
+                          description: 'Name of your Admin AD group created via GIAM. Members will have Admin access over the cluster'
+                          type: string
+                        privateDnsZone:
+                          description: 'Name of your Private DNS Zone in Azure to use with the cluster.'
+                          mapping: 'privatednszone.network.azure.upbound.io/status.atProvider.soaRecord.fqdn'
+                          type: string
+                        dynatraceManagementZone:
+                          description: 'Your valid management zone of DynaTrace - e.g. mz-az-tech-crp_aks.'
+                          type: string
+                        dynatraceNetworkZone:
+                          description: 'If the field is left empty, the nearest network zone will be set by default. Must be a valid network zones in Dynatrace'
+                          type: string
+                        appServiceTag:
+                          description: Value of app.service tag used to tag cluster and platform namespaces, references the Application Service in ServiceNow
+                          type: string
+                      required:
+                        - enableStorageProvisioning
+                        - productionCluster
+                        - adViewerGroupName
+                        - adEditorGroupName
+                        - adAdminGroupName
+                        - privateDnsZone
+                      type: object
+                  required:
+                    - name
+                    - deploymentLocation
+                    - serviceAdminEmail
+                providerConfigRef:
+                  type: object
+                  properties:
+                    name:
+                      type: string
