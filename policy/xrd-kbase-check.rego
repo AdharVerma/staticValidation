@@ -1,12 +1,4 @@
 # This Rego policy is to check if the Kbase in XRD is as per the defined template 
-# metadata.annotation should have the following paramters:
-# docs.allianz.io/description: |				
-#	docs.allianz.io/usecases: |				    
-#	docs.allianz.io/advantages: |				
-#	docs.allianz.io/dependencies: |				
-#	docs.allianz.io/namingConvention: |			
-#	docs.allianz.io/tags: 					   
-#	docs.allianz.io/frontEndName:
 
 package main
 
