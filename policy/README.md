@@ -2,7 +2,7 @@
 
 This Rego policy validates CompositeResourceDefinition (XRD) objects in Crossplane to ensure the Kbase, added for AI chatbot claim generator, is following the standards.
 
-It checks that the first letter of spec.names.kind is "X" and spec.claimNames.kind starts with an uppercase letter. A helper function, valid_claim_names(name), uses a regex to validate the uppercase requirement. It checks that the metadata.annotations has the following parameters:
+It checks that the metadata.annotations has the following parameters:
 
 - docs.allianz.io/description: |				# paragraph (multiline) 
 -	docs.allianz.io/usecases: |				    # hyphened statements of possible usecases
