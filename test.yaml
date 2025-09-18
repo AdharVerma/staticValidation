@@ -1,0 +1,224 @@
+---
+apiVersion: apiextensions.crossplane.io/v1
+kind: CompositeResourceDefinition
+metadata:
+  name: xeksclusters.composite.adp.allianz.io
+  annotations:
+    docs.allianz.io/description: |
+      Provisions a dedicated CRP2.0 Kubernetes cluster on AWS (EKS) within the Future Cloud Platform (FCP) AWS accounts and AWS SCC+ network zone for Allianz's enhanced security and compliance.
+      EKS is a fully managed Kubernetes service in AWS that runs on a dedicated and isolated set of EC2 instances or AWS Fargate compute resources, provisioned per project or team. This architecture provides strong workload isolation and enables the deployment and lifecycle management of containerized applications that require high availability, scalability, and portability. It also supports multi-region application deployments to meet performance, latency, or disaster recovery requirements across the AWS global infrastructure.
+    docs.allianz.io/usecases: |
+        - Deploy secure, scalable microservices accessible only within the Allianz internal network, using AWS Elastic Kubernetes Service (EKS) to manage distributed containerized workloads across multiple AWS regions.
+        - Require multi-tenant, production-grade workloads with strict isolation and compliance needs, including tenant-level network segmentation, dedicated EC2 infrastructure, and fine-grained RBAC and NetworkPolicies.
+        - Deploy complex, high-performance applications—such as APIs, memory-intensive services, and ML workloads—across multiple AWS Availability Zones, using configurable EC2 instance types to meet workload-specific hardware requirements.
+        - Require full control over the Kubernetes environment, including cluster-level configuration, custom networking, AWS IAM integration, and compliance-driven infrastructure segregation.
+        - Require maximum compatibility and lowest latency integration with AWS-native services such as AWS Bedrock, S3, DynamoDB, AWS Secrets Manager, ECR.
+    docs.allianz.io/advantages: |
+        - Workload Isolation and Governance: Dedicated EC2 instances ensures strong tenant isolation and compliance alignment.
+        - Granular Control and Customization: Full AWS (EKS) Kubernetes cluster admin with customizable networking, infrastructure and authentication, authorization.
+        - High Availability and Resilience: Multi-AZ and multi-region AWS cloud deployments with optimized EC2 instance types for fault tolerance.
+        - AWS Service Integration: Seamless connectivity with S3, DynamoDB, Secrets Manager, ECR, and CloudWatch.
+        - Enterprise Observability: Native support for Dynatrace and AWS CloudWatch for full-stack, end-to-end visibility.
+    docs.allianz.io/dependencies: |
+        - dedicatedaccount.aws.composite.scc.allianz.io
+        - dedicatedvpc.aws.composite.scc.allianz.io
+    docs.allianz.io/namingconvention: |
+        - Cluster name configures at spec.cluster.name must be between 4 and 16 characters, lowercase alphanumeric characters and hyphens, starting with a letter. This field must be be unique per FCP profile.
+        - If customer have multiple AWS account and need to create two clusters with the same name in the same FCP profile, then specify a unique spec.cluster.name and specify crossplane.io/external-name annotation with the common AWS cluster name.
+        - This field crossplane.io/external-name in annotation if present must be unique per FCP profile and must be between 4 and 16 characters, lowercase alphanumeric characters and hyphens, starting with a letter.
+    docs.allianz.io/tags: aws, kubernetes, eks, dedicated, microservices, adp, crp, crp2, crp2.0
+    docs.allianz.io/frontEndName: "Kubernetes cluster on AWS"
+spec:
+  group: composite.adp.allianz.io
+  names:
+    kind: XEksCluster
+    plural: xeksclusters
+    singular: xekscluster
+  claimNames:
+    kind: EksCluster
+    plural: eksclusters
+    singular: ekscluster
+  defaultCompositeDeletePolicy: Foreground
+  versions:
+    - name: v1alpha1
+      served: true
+      referenceable: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              required:
+                - cluster
+              properties:
+                team:
+                  type: object
+                  properties:
+                    name:
+                      description: 'Name: the name of your team'
+                      type: string
+                cluster:
+                  type: object
+                  properties:
+                    name:
+                    # Might be removed in the future, when Crossplane will support regex https://github.com/crossplane/crossplane/pull/3164
+                      description: 'Name: the name of your cluster'
+                      type: string
+                      pattern: ^[a-z0-9]+(?:-[a-z0-9]+)*$
+                      minLength: 4
+                      maxLength: 16
+                    deploymentLocation:
+                      description: 'deploymentLocation: the Location where EKS will be deployed Possible values:
+                      "aws_ec1" -> AWS eu-central-1 (Frankfurt) "aws_ew3" -> AWS eu-west-3 (Paris) "aws_ase2" -> AWS ap-southeast-2 (Sydney) "aws_ase4" -> AWS ap-southeast-4 (Melbourne) "aws_ase1" -> AWS ap-southeast-1 (Singapore) "aws_ase3" -> AWS ap-southeast-3 (Jakarta) "aws_ue1" -> AWS us-east-1 (N. Virginia) "aws_uw1" -> AWS us-west-1 (N. California) "aws_ec2" -> AWS eu-central-2 (Zurich) "aws_se1" -> AWS sa-east-1 (São Paulo)'
+
+                      enum:
+                        - aws_ec1
+                        - aws_ew3
+                        - aws_ase2
+                        - aws_ase1
+                        - aws_ase4
+                        - aws_ase3
+                        - aws_ue1
+                        - aws_uw1
+                        - aws_ec2
+                        - aws_se1
+
+                      type: string
+                    serviceAdminEmail:
+                      type: string
+                    serviceParameters:
+                      description: ServiceParameters holds the desired parameters for
+                        eks
+                      properties:
+                        advancedParameters:
+                          description: 'AdvancedParameters : The Advanced parameters
+                            desired for eks.'
+                          properties:
+                            assumeRoleFromAwsAccountId:
+                              type: string
+                            bringYourOwnAccount:
+                              enum:
+                                - "true"
+                                - "false"
+                              type: string
+                            eksPublicCustomerWhitelist:
+                              type: string
+                            customConfig:
+                              type: string
+                            noProxyWhitelist:
+                              type: string
+                            proxyHost:
+                              type: string
+                            proxyPort:
+                              type: string
+                          type: object
+                        availabilityZones:
+                          enum:
+                            - "2"
+                            - "3"
+                          type: string
+                        awsAccountId:
+                          description: 'AWSAccountId: the AWS account id of the
+                            account that you want to use for the EKS cluster.'
+                          type: string
+                        awsAccountName:
+                          description: "awsAccountName: name of the DedicatedAccount (currently aws.composite.scc.allianz.io/v1alpha1) object."
+                          type: string
+                        az1HarmonizedSubnetId:
+                          description: 'az1HarmonizedSubnetId: the harmonized subnet id of
+                           the Availability Zone 1, usually named xx_public_internal_1 in the aws console.'
+                          type: string
+                        az1PodSubnetId:
+                          description: 'az1PodSubnetId: the pod subnet id of
+                                the Availability Zone 1, usually named xx_private_internal_1 in the aws console.'
+                          type: string
+                        az1WorkerSubnetId:
+                          description: 'az1WorkerSubnetId: the worker subnet id of
+                                the Availability Zone 1, usually named xx_public_internal_1 in the aws console.'
+                          type: string
+                        az2HarmonizedSubnetId:
+                          description: 'az2HarmonizedSubnetId: the harmonized subnet id of
+                                the Availability Zone 2, usually named xx_public_internal_2 in the aws console.'
+                          type: string
+                        az2PodSubnetId:
+                          description: 'az2PodSubnetId: the pod subnet id of
+                                the Availability Zone 2, usually named xx_private_internal_2 in the aws console.'
+                          type: string
+                        az2WorkerSubnetId:
+                          description: 'az2WorkerSubnetId: the worker subnet id of
+                                the Availability Zone 2, usually named xx_public_internal_2 in the aws console.'
+                          type: string
+                        az3HarmonizedSubnetId:
+                          description: 'az3HarmonizedSubnetId: the harmonized subnet id of
+                                the Availability Zone 3, usually named xx_public_internal_3 in the aws console.'
+                          type: string
+                        az3PodSubnetId:
+                          description: 'az3PodSubnetId: the pod subnet id of
+                                the Availability Zone 3, usually named xx_private_internal_3 in the aws console.'
+                          type: string
+                        az3WorkerSubnetId:
+                          description: 'az3WorkerSubnetId: the worker subnet id of
+                                the Availability Zone 3, usually named xx_public_internal_3 in the aws console.'
+                          type: string
+                        automationRole:
+                          description: 'AutomationRole: existing IAM role name from target AWS account to be used for automation'
+                          type: string
+                        ingressSecurityGroupIds:
+                          description: 'IngressSecurityGroupIds: the security group id of the ingress security group. Create a security group in the target AWS account and provide the id here. Comma separated if multiple Ids.'
+                          type: string
+                        instanceType:
+                          description: 'InstanceType: the AWS EC2 instance type of the EKS worker nodes. Minimum recommended: "c5.xlarge"'
+                          type: string
+                        productionCluster:
+                          enum:
+                            - "true"
+                            - "false"
+                          type: string
+                        r53HostedZoneDomainName:
+                          description: 'R53HostedZoneDomainName: the domain name of the
+                                DNS hosted zone in the target AWS account.'
+                          type: string
+                        sshWorkerKeyPairName:
+                          description: 'SSHWorkerKeyPairName: the name of the SSH key pair
+                                to be used for the EKS worker nodes. Must be created in advance. Can be created/imported in the AWS console under EC2 - Key Pair'
+                          type: string
+                        dynatraceManagementZone:
+                          description: 'DynatraceManagementZone: Your valid management zone of DynaTrace - e.g. mz-az-tech-crp_eks.'
+                          type: string
+                        dynatraceNetworkZone:
+                          description: 'DynatraceNetworkZone: Your valid network zone of DynaTrace - e.g. az.aws.ec1-fcp-ssm.'
+                          type: string
+                        appServiceTag:
+                          description: Value of app.service tag used to tag cluster and platform namespaces, references the Application Service in ServiceNow
+                          type: string
+                        version:
+                          description: 'Version: the version of the CRP 2.0 cluster. Example values: "8.0.0", "7.2.0'
+                          type: string
+                        workerSecurityGroupIds:
+                          description: 'WorkerSecurityGroupIds: the security group id of the Worker node security group. Create a security group in the target AWS account and provide the id here. Comma separated if multiple Ids.'
+                          type: string
+                      required:
+                        - availabilityZones
+                        - az1HarmonizedSubnetId
+                        - az1PodSubnetId
+                        - az1WorkerSubnetId
+                        - az2HarmonizedSubnetId
+                        - az2PodSubnetId
+                        - az2WorkerSubnetId
+                        - productionCluster
+                        - sshWorkerKeyPairName
+                        - workerSecurityGroupIds
+                        - ingressSecurityGroupIds
+                        - r53HostedZoneDomainName
+                        - version
+                      type: object
+                  required:
+                    - name
+                    - deploymentLocation
+                    - serviceAdminEmail
+                providerConfigRef:
+                  type: object
+                  properties:
+                    name:
+                      type: string
