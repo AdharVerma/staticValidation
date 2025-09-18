@@ -22,7 +22,7 @@ metadata:
     docs.allianz.io/dependencies: |
         - dedicatedaccount.aws.composite.scc.allianz.io
         - dedicatedvpc.aws.composite.scc.allianz.io
-    docs.allianz.io/namingconvention: |
+    docs.allianz.io/namingConvention: |
         - Cluster name configures at spec.cluster.name must be between 4 and 16 characters, lowercase alphanumeric characters and hyphens, starting with a letter. This field must be be unique per FCP profile.
         - If customer have multiple AWS account and need to create two clusters with the same name in the same FCP profile, then specify a unique spec.cluster.name and specify crossplane.io/external-name annotation with the common AWS cluster name.
         - This field crossplane.io/external-name in annotation if present must be unique per FCP profile and must be between 4 and 16 characters, lowercase alphanumeric characters and hyphens, starting with a letter.
