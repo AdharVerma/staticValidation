@@ -1,0 +1,46 @@
+name: Kbase CI
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull req uest events but only for the "main" branch
+  push:
+    branches: [ "main" ]
+    paths:
+      - '**/*.yaml'
+      - '**/*.yml'
+
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job named "OPA checks"
+  opa-checks:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v4
+
+      # Install Conftest 
+      - name: Install Conftest
+        run: |
+          wget https://github.com/open-policy-agent/conftest/releases/download/v0.53.0/conftest_0.53.0_Linux_x86_64.tar.gz
+          tar xzf conftest_0.53.0_Linux_x86_64.tar.gz
+          sudo mv conftest /usr/local/bin/
+
+      # Running the policy on all the yaml or yml files to ensure nothing invalid slips into main.
+      - name: Run Conftest on changed YAML/YML files
+        run: |
+          files=$(find . -type f \( -name "*.yaml" -o -name "*.yml" \))
+          for file in $files; do
+            kind=$(yq eval '.kind' "$file")
+            if [ "$kind" = "CompositeResourceDefinition" ]; then
+              echo "Validating XRD: $file"
+              conftest test --policy ./policy "$file"
+            else
+              echo "Skipping $file (not an XRD)"
+            fi
+          done
+          #conftest test --policy ./policy ${{ steps.changed-files.outputs.all_changed_files }}
+          
