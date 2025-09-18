@@ -1,12 +1,9 @@
-# This is a basic workflow to help you get started with Actions
-
 name: Kbase CI
 
 # Controls when the workflow will run
 on:
-  # Triggers the workflow on push or pull request events but only for the "main" branch
+  # Triggers the workflow on push or pull req uest events but only for the "main" branch
   pull_request:
-    #branches: [ "main" ]
     paths:
       - '**/*.yaml'
       - '**/*.yml'
@@ -16,8 +13,6 @@ on:
       - '**/*.yaml'
       - '**/*.yml'
 
-  # Allows you to run this workflow manually from the Actions tab
-  #workflow_dispatch: Not Needed
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -31,21 +26,33 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v4
 
-      # Runs a single command using the runners shell
+      # Install Conftest 
       - name: Install Conftest
         run: |
           wget https://github.com/open-policy-agent/conftest/releases/download/v0.53.0/conftest_0.53.0_Linux_x86_64.tar.gz
           tar xzf conftest_0.53.0_Linux_x86_64.tar.gz
           sudo mv conftest /usr/local/bin/
 
-      # Runs a set of commands using the runners shell
-      - name: Defining scope, this will only run if the file is ".yaml" and is XRD ('.kind' == "CompositeResourceDefinition")
+      # Defining Scope: Get all the .yml or .yaml files that were changed in the request, increasing the performance.
+      - name: Get changed YAML files
+        id: changed-files
+        uses: tj-actions/changed-files@v45
+        with:
+          files: |
+            **/*.yaml
+            **/*.yml
+      
+      # Running the policy ONLY on all the changed files that are XRD
+      - name: Run Conftest on changed XRD YAML files
+        if: steps.changed-files.outputs.any_changed == 'true'
         run: |
-          #- name: Validate only XRDs
-              for file in $(find . -type f -name "*.yaml"); do
-                if yq eval '.kind' $file | grep -q "CompositeResourceDefinition"; then
-                  echo "Validating $file"
-                  conftest test --policy ./policy $file
-                fi
-              done
-          # conftest test --policy ./policy ./**/*.yaml
+          for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
+            if yq eval '.kind' "$file" | grep -q "CompositeResourceDefinition"; then
+              echo "Validating $file"
+              conftest test --policy ./policy "$file"
+            else
+              echo "Skipping $file (not an XRD)"
+            fi
+          done
+          #conftest test --policy ./policy ${{ steps.changed-files.outputs.all_changed_files }}
+          
