@@ -18,7 +18,7 @@ metadata:
     docs.allianz.io/dependencies: |
       - dedicatedsubscription.v1.az.composite.scc.allianz.io
       - dedicatedvnet.v1.az.composite.scc.allianz.io
-    docs.allianz.io/namingconvention: |
+    docs.allianz.io/namingConvention: |
       There is no specific naming convention, as these rules are created directly in Azure Firewall.
     docs.allianz.io/tags: azure, firewall, domains, network-security
     docs.allianz.io/frontEndName: "Azure Application Firewall: Allow Specific Public Domain"
