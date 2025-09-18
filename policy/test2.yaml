@@ -15,7 +15,7 @@ metadata:
     docs.allianz.io/advantages: |
       - Provides granular control over external domain access
       - Maintains security while enabling necessary external connectivity
-    docs.allianz.io/dependencies: |
+    docs.allianz.io/deendencies: |
       - dedicatedsubscription.v1.az.composite.scc.allianz.io
       - dedicatedvnet.v1.az.composite.scc.allianz.io
     docs.allianz.io/namingConvention: |
