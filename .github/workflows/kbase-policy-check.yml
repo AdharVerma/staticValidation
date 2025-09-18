@@ -9,7 +9,7 @@ on:
       - '**/*.yaml'
       - '**/*.yml'
   push:
-    branches: [ "main" ]
+    #branches: [ "main" ]
     paths:
       - '**/*.yaml'
       - '**/*.yml'
