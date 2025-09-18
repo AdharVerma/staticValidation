@@ -13,7 +13,7 @@ metadata:
         - Deploy complex, high-performance applications—such as APIs, memory-intensive services, and ML workloads—across multiple AWS Availability Zones, using configurable EC2 instance types to meet workload-specific hardware requirements.
         - Require full control over the Kubernetes environment, including cluster-level configuration, custom networking, AWS IAM integration, and compliance-driven infrastructure segregation.
         - Require maximum compatibility and lowest latency integration with AWS-native services such as AWS Bedrock, S3, DynamoDB, AWS Secrets Manager, ECR.
-    docs.allianz.io/advantages: |
+    docs.allianz.io/advntages: |
         - Workload Isolation and Governance: Dedicated EC2 instances ensures strong tenant isolation and compliance alignment.
         - Granular Control and Customization: Full AWS (EKS) Kubernetes cluster admin with customizable networking, infrastructure and authentication, authorization.
         - High Availability and Resilience: Multi-AZ and multi-region AWS cloud deployments with optimized EC2 instance types for fault tolerance.
