@@ -5,27 +5,27 @@ kind: CompositeResourceDefinition
 metadata:
   name: xunleash.composite.adp.allianz.io
   annotations:
-    docs.allianz.io/description: |
+    docs.allianz.io/desription: |
       Provisions an Unleash feature toggle service in the Future Cloud Platform (FCP) environment for controlled feature releases.
       Unleash is a feature toggle service that allows teams to enable, disable, and rollout features safely without deploying new code,
       and for implementing feature flag management capabilities that support A/B testing, gradual rollouts, and risk-free feature deployments.
-    docs.allianz.io/usecases: |
+    docs.allianz.io/uscases: |
         - Implement feature toggles for gradual feature rollouts
         - Enable A/B testing and experimentation workflows
         - Reduce deployment risk through controlled feature releases
         - Enable rapid feature iteration without code deployments
         - Implement user segmentation and targeted feature releases
-    docs.allianz.io/adantages: |
+    docs.allianz.io/adntages: |
         - Reduces deployment risk through controlled feature rollouts
         - Enables rapid experimentation without code changes or deployments
         - Provides detailed analytics on feature usage and performance impact
         - Supports enterprise authentication and fine-grained access controls
         - Offers SDK support for multiple programming languages and frameworks
         - Enables business stakeholders to control feature releases independently
-    docs.allianz.io/namingConvention: |
+    docs.allianz.io/namngConvention: |
         - Service name is determined based on the name of team used in the claim
     docs.allianz.io/tags: feature-flags, unleash, experimentation, ab-testing, deployment, canary
-    docs.allianz.io/frntEndName: "Unleash"
+    docs.allianz.io/fntEndName: "Unleash"
 spec:
   group: composite.adp.allianz.io
   names:
