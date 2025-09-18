@@ -43,4 +43,4 @@ jobs:
                   conftest test --policy ./policy $file
                 fi
               done
-          # conftest test --policy ./policy ./xrd-manifests/*.yaml
+          # conftest test --policy ./policy ./**/*.yaml
