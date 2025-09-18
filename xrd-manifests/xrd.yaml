@@ -16,7 +16,7 @@ metadata:
           - Multi-zone node pools for resilient workloads
           - Native Integration with Dynatrace for monitoring and observability
           - Run applications in multiple regions
-      docs.allianz.io/advantages: |
+      docs.allianz.io/dvantages: |
           - Reduces operational overhead with a fully managed control plane
           - Availability of Node Autoscaling and Spot VMs to reduce cloud spend
           - Ensures secure, enterprise-grade deployments with RBAC and network policies
